@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Chart from "chart.js/auto";
 
 const SellerHome = () => {
   const [region, setRegion] = useState("");
@@ -18,16 +19,40 @@ const SellerHome = () => {
   };
 
   const productData = [
-    { region: "রাজশাহী", product: "আম", seller: "করিম হক", price: 180 },
-    { region: "রাজশাহী", product: "আম", seller: "কুদ্দুস মোল্লা", price: 120 },
-    { region: "রাজশাহী", product: "আম", seller: "খাইরুল আমিন", price: 110 },
-    { region: "রাজশাহী", product: "আম", seller: "তাহমিনা বেগম", price: 90 },
+    { region: "Rajshahi", product: "Mango", seller: "Karim Haque", price: 180 },
+    { region: "Rajshahi", product: "Mango", seller: "Kuddus Molla", price: 120 },
+    { region: "Dhaka", product: "Banana", seller: "Khairul Amin", price: 110 },
+    { region: "Khulna", product: "Litchi", seller: "Tahmina Begum", price: 90 },
+    { region: "Chittagong", product: "Potato", seller: "Karim Hossain", price: 190 },
+    { region: "Sylhet", product: "Banana", seller: "Taslima Khatun", price: 40 },
+    { region: "Dhaka", product: "Tomato", seller: "Sufia Begum", price: 20 },
+    { region: "Rajshahi", product: "Rice", seller: "Nargis Parvin", price: 160 },
+    { region: "Rangpur", product: "Wheat", seller: "Mahmudul Hasan", price: 160 },
+    { region: "Chittagong", product: "Tomato", seller: "Arif Rahman", price: 120 },{ region: "Khulna", product: "Litchi", seller: "Tahmina Begum", price: 90 },
+    { region: "Dhaka", product: "TSP", seller: "Nazrul Islam", price: 110 },
+    { region: "Sylhet", product: "Potato", seller: "Rokeya Sultana", price: 50 },
+    { region: "Chittagong", product: "Lentils", seller: "Kamal Hossain", price: 60 },
+    { region: "Rangpur", product: "DAP", seller: "Farida Yasmin", price: 70 },
+    { region: "Rajshahi", product: "Wheat", seller: "Jamil Chowdhury", price: 80 },
+    { region: "Barishal", product: "Rice", seller: "Tahmina Bhuiyan", price: 100 },
+    { region: "Chittagong", product: "Litchi", seller: "Saifur Rahman", price: 200 },
+    { region: "Khulna", product: "DAP", seller: "Rubel Mia", price: 30 },
+    { region: "Rajshahi", product: "Wheat", seller: "Habibur Rahman", price: 210 },
+    { region: "Dhaka", product: "TSP", seller: "Azizur Rahman", price: 250 },
+    { region: "Chittagong", product: "Lentils", seller: "Shahadat Hossain", price: 100 },
+    { region: "Khulna", product: "Rice", seller: "Mahbubur Rahman", price: 30 },
+    { region: "Barishal", product: "Jackfruit", seller: "Tahmina Begum", price: 60 },
+    { region: "Barishal", product: "Guava", seller: "Rahim Uddin", price: 190 },
+    { region: "Rangpur", product: "Jackfruit", seller: "Faruk Ahmed", price: 170 },
+    { region: "Rngpur", product: "Guava", seller: "Arifa Begum", price: 130 },
   ];
 
   const filteredProducts = productData.filter(
     (item) =>
       (region === "" || item.region === region) &&
-      (searchQuery === "" || item.product.includes(searchQuery))
+      (mainCategory === "" || subcategories[mainCategory]?.includes(item.product)) &&
+      (subCategory === "" || item.product.toLowerCase() === subCategory) &&
+      (searchQuery === "" || item.product.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const handleCategoryChange = (e) => {
@@ -35,53 +60,60 @@ const SellerHome = () => {
     setSubCategory("");
   };
 
-  const drawChart = () => {
-    const canvas = document.getElementById("myBarChart");
+  const drawPieChart = () => {
+    const canvas = document.getElementById("myPieChart");
     const ctx = canvas.getContext("2d");
 
-    // Clear previous chart
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Calculate average prices for each product
+    const productMap = {};
+    filteredProducts.forEach((item) => {
+      if (!productMap[item.product]) {
+        productMap[item.product] = { total: 0, count: 0 };
+      }
+      productMap[item.product].total += item.price;
+      productMap[item.product].count += 1;
+    });
 
-    const labels = filteredProducts.map((item) => item.seller);
-    const data = filteredProducts.map((item) => item.price);
+    const labels = Object.keys(productMap);
+    const data = labels.map((label) => productMap[label].total / productMap[label].count);
 
-    const chartWidth = canvas.width - 100;
-    const chartHeight = canvas.height - 50;
-    const barWidth = chartWidth / data.length - 10;
-    const maxDataValue = Math.max(...data);
-    const scale = chartHeight / maxDataValue;
+    // Destroy the previous chart instance if it exists
+    if (window.myChart) {
+      window.myChart.destroy();
+    }
 
-    // Draw X and Y axis
-    ctx.beginPath();
-    ctx.moveTo(50, 0);
-    ctx.lineTo(50, chartHeight);
-    ctx.lineTo(chartWidth + 50, chartHeight);
-    ctx.stroke();
-
-    // Draw bars
-    data.forEach((value, index) => {
-      const barHeight = value * scale;
-      const x = 60 + index * (barWidth + 10);
-      const y = chartHeight - barHeight;
-
-      ctx.fillStyle = "rgba(75, 192, 192, 0.5)";
-      ctx.fillRect(x, y, barWidth, barHeight);
-
-      // Add labels
-      ctx.fillStyle = "#000";
-      ctx.fillText(labels[index], x + barWidth / 4, chartHeight + 15);
-      ctx.fillText(value, x + barWidth / 4, y - 5);
+    window.myChart = new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Average Price",
+            data,
+            backgroundColor: [
+              "#FF6384",
+              "#36A2EB",
+              "#FFCE56",
+              "#4BC0C0",
+              "#9966FF",
+            ],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+      },
     });
   };
 
   useEffect(() => {
-    drawChart();
+    drawPieChart();
   }, [filteredProducts]);
 
   return (
-    <div className="container mx-auto mt-10 lg:mt-[100px]">
-      <div className="border-t-2 border-b-2 border-gray-300 border-dashed p-6 lg:p-9 text-center">
-        <h2 className="text-xl lg:text-4xl font-extrabold">সেলার সেন্টার</h2>
+    <div className="container mx-auto mt-0 text-center">
+      <div>
+        <h1 className="text-xl lg:text-4xl font-extrabold">Seller Center</h1>
         <form className="max-w-md mx-auto mt-6">
           <input
             type="search"
@@ -97,9 +129,14 @@ const SellerHome = () => {
             onChange={(e) => setRegion(e.target.value)}
             className="block w-full p-2.5 border border-gray-300 rounded-lg"
           >
-            <option value="">অঞ্চল বাছাই করুন</option>
-            <option value="রাজশাহী">রাজশাহী</option>
-            <option value="ঢাকা">ঢাকা</option>
+            <option value="">Select Division</option>
+            <option value="Dhaka">Dhaka</option>
+            <option value="Chittagong">Chittagong</option>
+            <option value="Rajshahi">Rajshahi</option>
+            <option value="Barishal">Barishal</option>
+            <option value="Rangpur">Rangpur</option>
+            <option value="Khulna">Khulna</option>
+            <option value="Sylhet">Sylhet</option>
           </select>
         </form>
 
@@ -130,24 +167,14 @@ const SellerHome = () => {
           </select>
         </div>
 
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            drawChart();
-          }}
-          className="bg-blue-600 text-white px-4 py-2 rounded mt-6"
-        >
-          Apply
-        </button>
-
         <div className="overflow-x-auto mt-8">
           <table className="table-auto w-full">
             <thead>
               <tr>
-                <th>অঞ্চল</th>
-                <th>পণ্য</th>
-                <th>বিক্রেতা</th>
-                <th>মূল্য (৳)</th>
+                <th>Division</th>
+                <th>Product Name</th>
+                <th>Seller Name</th>
+                <th>Price (৳)</th>
               </tr>
             </thead>
             <tbody>
@@ -163,9 +190,12 @@ const SellerHome = () => {
           </table>
         </div>
 
-        <div className="mt-8">
-          <canvas id="myBarChart" width="400" height="200"></canvas>
-        </div>
+        <div className="mt-8 flex flex-col items-center">
+  <h2 className="text-xl font-bold mb-4">Average Product Prices</h2>
+  <div className="w-1/2">
+    <canvas id="myPieChart"></canvas>
+  </div>
+</div>
       </div>
     </div>
   );
