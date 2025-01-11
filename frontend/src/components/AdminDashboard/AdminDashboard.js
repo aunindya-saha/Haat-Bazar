@@ -9,8 +9,9 @@ const AdminDashboard = () => {
     <div className="flex">
       <div></div>
       {/* Sidebar */}
-      <div className="w-1/6 p-4 min-h-screen bg-gray-800 text-2xl">
+      <div className="w-1/6 p-4 min-h-screen bg-gray-800 text-xl">
         <ul className="menu">
+       
           <li>
             <Link
               className="text-white mt-3 font-bold hover:text-black"
@@ -20,6 +21,7 @@ const AdminDashboard = () => {
             </Link>
           </li>
           <hr />
+
           <li>
             <Link
               className="text-white mt-3 font-bold hover:text-black"
@@ -38,6 +40,7 @@ const AdminDashboard = () => {
             </Link>
           </li>
           <hr />
+
           <li>
             <Link
               className="text-white mt-3 font-bold hover:text-black"
@@ -55,6 +58,16 @@ const AdminDashboard = () => {
               <span className="flex gap-4">Complaints</span>
             </Link>
           </li>
+          <hr />
+          <li>
+            <Link
+              className="text-white mt-3 font-bold hover:text-black"
+              to="/adminDashboard/adminMessage"
+            >
+              <span className="flex gap-4">Messages</span>
+            </Link>
+          </li>
+
         </ul>
       </div>
 

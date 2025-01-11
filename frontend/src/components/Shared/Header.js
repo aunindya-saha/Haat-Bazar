@@ -21,7 +21,7 @@ const Header = () => {
 
       {/* Logo at Top-Left */}
       <div className="absolute top-4 left-4">
-        <img src={logo} alt="HaatBazar Logo" className="h-40" />
+        <img src={logo} alt="HaatBazar Logo" className="h-36" />
       </div>
 
       {/* User Image at Top-Right */}
